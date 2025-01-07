@@ -1,28 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
-import React, {useEffect, useState} from "react"
-import io from "socket.io-client"
+import logo from "./logo.svg";
+import "./App.css";
+import React, { useEffect, useState } from "react";
+import io from "socket.io-client";
 
-const socket= 
+// creates a user socket + connects to server using URL and port
+const socket = io("http://localhost:3000");
 
 function App() {
+  // sets state of the document
+  const [text, setText] = useState("");
+
+  // when client recevies the broadcast emit from server
+  // indicating an update, useEffect resets the textarea with the update
+  useEffect(() => {
+    socket.on("update", (data) => {
+      setText(data);
+    });
+  }, []);
+
+  // takes a value from the client and transmits back to server
+  const handleUpdate = (event) => {
+    const value = event.target.value;
+    setText(value);
+    socket.emit("edit", value);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <textarea
+      value={text}
+      onChange={handleUpdate}
+      rows="20"
+      cols="50"
+      placeholder="Start collaborating..."
+    />
   );
 }
 
