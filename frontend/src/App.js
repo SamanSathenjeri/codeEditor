@@ -1,7 +1,7 @@
-import logo from "./logo.svg";
-import "./App.css";
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
+import { Editor } from "@monaco-editor/react";
+import "./App.css";
 
 // creates a user socket + connects to server using URL and port
 const socket = io("http://localhost:3000");
@@ -16,23 +16,28 @@ function App() {
     socket.on("update", (data) => {
       setText(data);
     });
+
+    return () => socket.off("update");
   }, []);
 
   // takes a value from the client and transmits back to server
-  const handleUpdate = (event) => {
-    const value = event.target.value;
-    setText(value);
-    socket.emit("edit", value);
+  const handleUpdate = (value) => {
+    if (value !== undefined) { 
+      setText(value);
+      socket.emit("edit", value);
+    }
   };
 
   return (
-    <textarea
-      value={text}
-      onChange={handleUpdate}
-      rows="20"
-      cols="50"
-      placeholder="Start collaborating..."
-    />
+    <div className="App">
+      <Editor
+        height="600px"
+        language="javascript"
+        theme="vs-dark"
+        value={text} // Bind the editor content to state
+        onChange={handleUpdate} // Update state and server on changes
+      />
+    </div>
   );
 }
 
