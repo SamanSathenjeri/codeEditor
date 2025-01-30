@@ -1,18 +1,30 @@
-const { Server } = require("socket.io");
-const express = require("express");
-const https = require("https");
-const http = require("http");
-const fs = require("fs");
-// const cors = require("cors")
+import { Server } from "socket.io";
+import express from "express";
+import https from "https";
+import http from "http";
+import fs from "fs";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+// import cors from "cors";
 
-// https://www.youtube.com/watch?v=ZKEqqIO7n-k&t=112s -- This 
+import { connectAuthDB } from "./db/connectAuthDB.js";
+import authRoutes from "./routes/auth.route.js";
+
+// https://www.youtube.com/watch?v=ZKEqqIO7n-k&t=112s -- This
 // https://www.smashingmagazine.com/2022/01/building-web-code-editor/
 // https://www.youtube.com/watch?v=pmvEgZC55Cg -- This is for auth
 // https://www.youtube.com/watch?v=ey1Bi6lI0Gg -- This is for room/namespaces & importing code mirror
 // https://www.youtube.com/watch?v=Tg4_Zyyx-QA -- This is for upload/download
 
 // creates a new express app
+dotenv.config();
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json())
+app.use(cookieParser())
+app.use("/auth", authRoutes);
+// app.use('/projects', projectRoutes);
 
 // creates a server on machine with express app instance
 const server = http.createServer(app);
@@ -27,8 +39,9 @@ const io = new Server(server, { cors: { origin: "*" } });
 // const io = new Server(httpsServer, {})
 
 // server listens for new connections at port 3000
-server.listen(3000, () => {
+server.listen(PORT, () => {
   console.log("Server is running on http://localhost:3000");
+  connectAuthDB();
 });
 
 // when a client connects to the server
