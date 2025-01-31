@@ -5,34 +5,26 @@ import http from "http";
 import fs from "fs";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-// import cors from "cors";
 
 import { connectAuthDB } from "./db/connectAuthDB.js";
 import authRoutes from "./routes/auth.route.js";
-
-// https://www.youtube.com/watch?v=ZKEqqIO7n-k&t=112s -- This
-// https://www.smashingmagazine.com/2022/01/building-web-code-editor/
-// https://www.youtube.com/watch?v=pmvEgZC55Cg -- This is for auth
-// https://www.youtube.com/watch?v=ey1Bi6lI0Gg -- This is for room/namespaces & importing code mirror
-// https://www.youtube.com/watch?v=Tg4_Zyyx-QA -- This is for upload/download
+import accountRoutes from "./routes/account.route.js";
+import projectRoutes from "./routes/project.route.js";
 
 // creates a new express app
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json())
-app.use(cookieParser())
+app.use(express.json());
+app.use(cookieParser());
 app.use("/auth", authRoutes);
-// app.use('/projects', projectRoutes);
+app.use("/account", accountRoutes);
+app.use("/projects", projectRoutes);
 
 // creates a server on machine with express app instance
 const server = http.createServer(app);
-// set up https server when SSL certificates are gotten
-// const httpsServer = createServer({
-//     key: fs.readFileSync(),
-//     cert: fs.readFileSync()
-// })
+// const httpsServer = createServer({key: fs.readFileSync(), cert: fs.readFileSync()})
 
 // configures websocket to server and cors functionality
 const io = new Server(server, { cors: { origin: "*" } });
@@ -52,7 +44,6 @@ io.on("connection", (socket) => {
   // when there is an edit on any of the documents, the socket
   // receives an edit, and emits to all other users
   socket.on("edit", (data) => {
-    // console.log("Edit received: ", data);
     // broadcast used to emit data to all users but yourself (to avoid duplicates)
     socket.broadcast.emit("update", data);
   });
