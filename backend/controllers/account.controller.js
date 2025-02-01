@@ -134,7 +134,7 @@ export const deleteAccount = async (req, res) => {
         .status(400)
         .json({ success: false, message: "User Not Found" });
     }
-
+    res.clearCookie("token");
     res
       .status(200)
       .json({ success: true, message: "Account deleted successfully" });
