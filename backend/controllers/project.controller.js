@@ -63,6 +63,102 @@ export const deleteProject = async (req, res) => {
   }
 };
 
+export const addCollaborators = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const addedUser = await User.findById(userId);
+
+    const project = await Project.findById(req.projectId);
+    if (!project) {return res.status(400).json({ success: false, message: "Project Not Found" });}
+
+    const updateCollab = await Project.updateOne(
+      { _id: project },
+      { $push: { collaborators: addedUser } }
+    );
+
+    res.status(200).json({success: true, message: "Added Collaborator"})
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const getProject = async (req, res) => {
+  try {
+    const project = await Project.findById(req.projectId);
+    if (!project) {return res.status(400).json({ success: false, message: "Project Not Found" });}
+    res.status(200).json({success: true, message: "Project Found"})
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const getFile = async (req, res) => {
+  try {
+    const file = await File.findById(req.fileId)
+    if (!file) {return res.status(400).json({ success: false, message: "File Not Found" });}
+    res.status(200).json({success: true, message: "File Found"})
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const newFile = async (req, res) => {
+  try {
+    const { name, path, s3_key, size, type } = req.body
+
+    if (!(name && path && s3_key && size && type)) {
+      throw new Error("All fields are required");
+    }
+
+    const fileAlreadyExists = await File.findOne({ path, s3_key });
+    if (fileAlreadyExists) {
+      return res
+        .status(400)
+        .json({ success: false, message: "File already exists" });
+    }
+
+    const file = new File({name, path, s3_key, size, type});
+    res.status(200).json({success: true, message: "File successfully created"})
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const deleteFile = async (req, res) => {
+  try {
+    const deletedFile = await File.findByIdAndDelete(req.fileId);
+    if (!deleteFile) {
+      return res
+        .status(400)
+        .json({ success: false, message: "File Not Found" });
+    }
+    res
+      .status(200)
+      .json({ success: true, message: "File deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const getUsersProjects = async (req, res) => {
+  try {
+    const project = await Project.find({
+      $or: [{ owner: req.userId }, { users: req.userId }]
+    }).populate("owner users");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+}
+
 // export const projectDuplicate = async (req, res) => {
 //   try {
 //     const project = await Project.findById(req.projectId);
@@ -75,7 +171,7 @@ export const deleteProject = async (req, res) => {
 //       owner: project.owner,
 //       collaborators: project.collaborators,
 //       filepaths: project.filepaths
-//     })
+//     }) ******************************************** have to find a way to duplicate files too!!! ************************************
 
 //     await newProject.save()
 //     res.status(201).json({success: true, message: "Project duplicated succesfully"});
@@ -85,83 +181,3 @@ export const deleteProject = async (req, res) => {
 //     res.status(500).json({ success: false, message: "Server Error" });
 //   }
 // };
-
-// export const downloadProject = async (req, res) => {
-//   try {
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// };
-
-export const addCollaborators = async (req, res) => {
-  try {
-    
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-export const newFolder = async (req, res) => {
-  try {
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-export const newFile = async (req, res) => {
-  try {
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-export const deleteFolder = async (req, res) => {
-  try {
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-export const deleteFile = async (req, res) => {
-  try {
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-export const getFile = async (req, res) => {
-  try {
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-export const getFolder = async (req, res) => {
-  try {
-    
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-export const getProject = async (req, res) => {
-  try {
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
