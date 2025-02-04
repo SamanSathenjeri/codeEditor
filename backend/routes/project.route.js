@@ -16,14 +16,13 @@ import {
 const router = express.Router();
 
 router.post("/create-project", verifyToken, createProject);
-router.patch("/change-project-name", verifyToken, changeProjectName);
-router.delete("/delete-project", verifyToken, deleteProject);
-//router.post("/duplicate-project", verifyToken, projectDuplicate);
-router.patch("/add-collaborators", verifyToken, addCollaborators);
+router.patch("/change-project-name/:projectId", verifyToken, changeProjectName);
+router.delete("/delete-project/:projectId", verifyToken, deleteProject);
+router.patch("/add-collaborators/:projectId", verifyToken, addCollaborators);
 router.post("/new-file", verifyToken, newFile);
-router.delete("/delete-file", verifyToken, deleteFile);
-router.get("/get-file", verifyToken, getFile);
-router.get("/get-project", verifyToken, getProject);
-router.get("/get-users-projects", verifyToken, getUsersProjects)
+router.delete("/delete-file/:fileId", verifyToken, deleteFile);
+router.get("/get-file/:fileId", verifyToken, getFile);
+router.get("/get-project/:projectId", verifyToken, getProject);
+router.get("/get-users-projects", verifyToken, getUsersProjects);
 
 export default router;
